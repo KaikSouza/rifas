@@ -1,24 +1,18 @@
-/// <reference path="../../../../sweetalert2.d.ts"/>
-
 import { swalClasses } from '../../classes.js'
-import { error, isPromise, warn } from '../../utils.js'
+import { warn, error, isPromise } from '../../utils.js'
 import * as dom from '../../dom/index.js'
 import privateProps from '../../../privateProps.js'
 
 const inputTypes = ['input', 'file', 'range', 'select', 'radio', 'checkbox', 'textarea']
 
-/**
- * @typedef { import("sweetalert2").SweetAlertOptions } SweetAlertOptions
- */
-
 export const renderInput = (instance, params) => {
-  const popup = dom.getPopup()
+  const content = dom.getContent()
   const innerParams = privateProps.innerParams.get(instance)
   const rerender = !innerParams || params.input !== innerParams.input
 
   inputTypes.forEach((inputType) => {
     const inputClass = swalClasses[inputType]
-    const inputContainer = dom.getDirectChildByClass(popup, inputClass)
+    const inputContainer = dom.getChildByClass(content, inputClass)
 
     // set attributes
     setAttributes(inputType, params.inputAttributes)
@@ -42,9 +36,7 @@ export const renderInput = (instance, params) => {
 
 const showInput = (params) => {
   if (!renderInputType[params.input]) {
-    return error(
-      `Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "${params.input}"`
-    )
+    return error(`Unexpected type of input! Expected "text", "email", "password", "number", "tel", "select", "radio", "checkbox", "textarea", "file" or "url", got "${params.input}"`)
   }
 
   const inputContainer = getInputContainer(params.input)
@@ -67,7 +59,7 @@ const removeAttributes = (input) => {
 }
 
 const setAttributes = (inputType, inputAttributes) => {
-  const input = dom.getInput(dom.getPopup(), inputType)
+  const input = dom.getInput(dom.getContent(), inputType)
   if (!input) {
     return
   }
@@ -75,6 +67,12 @@ const setAttributes = (inputType, inputAttributes) => {
   removeAttributes(input)
 
   for (const attr in inputAttributes) {
+    // Do not set a placeholder for <input type="range">
+    // it'll crash Edge, #1298
+    if (inputType === 'range' && attr === 'placeholder') {
+      continue
+    }
+
     input.setAttribute(attr, inputAttributes[attr])
   }
 }
@@ -107,41 +105,27 @@ const setInputLabel = (input, prependTo, params) => {
 
 const getInputContainer = (inputType) => {
   const inputClass = swalClasses[inputType] ? swalClasses[inputType] : swalClasses.input
-  return dom.getDirectChildByClass(dom.getPopup(), inputClass)
+  return dom.getChildByClass(dom.getContent(), inputClass)
 }
 
 const renderInputType = {}
 
-/**
- * @param {HTMLInputElement | HTMLTextAreaElement} input
- * @param {SweetAlertOptions} params
- */
-const checkAndSetInputValue = (input, params) => {
-  if (['string', 'number'].includes(typeof params.inputValue)) {
-    input.value = `${params.inputValue}`
+renderInputType.text =
+renderInputType.email =
+renderInputType.password =
+renderInputType.number =
+renderInputType.tel =
+renderInputType.url = (input, params) => {
+  if (typeof params.inputValue === 'string' || typeof params.inputValue === 'number') {
+    input.value = params.inputValue
   } else if (!isPromise(params.inputValue)) {
     warn(`Unexpected type of inputValue! Expected "string", "number" or "Promise", got "${typeof params.inputValue}"`)
   }
+  setInputLabel(input, input, params)
+  setInputPlaceholder(input, params)
+  input.type = params.input
+  return input
 }
-
-/**
- * @param {HTMLInputElement} input
- * @param {SweetAlertOptions} params
- * @returns
- */
-renderInputType.text =
-  renderInputType.email =
-  renderInputType.password =
-  renderInputType.number =
-  renderInputType.tel =
-  renderInputType.url =
-    (input, params) => {
-      checkAndSetInputValue(input, params)
-      setInputLabel(input, input, params)
-      setInputPlaceholder(input, params)
-      input.type = params.input
-      return input
-    }
 
 renderInputType.file = (input, params) => {
   setInputLabel(input, input, params)
@@ -179,9 +163,8 @@ renderInputType.radio = (radio) => {
 }
 
 renderInputType.checkbox = (checkboxContainer, params) => {
-  /** @type {HTMLInputElement} */
-  const checkbox = dom.getInput(dom.getPopup(), 'checkbox')
-  checkbox.value = '1'
+  const checkbox = dom.getInput(dom.getContent(), 'checkbox')
+  checkbox.value = 1
   checkbox.id = swalClasses.checkbox
   checkbox.checked = Boolean(params.inputValue)
   const label = checkboxContainer.querySelector('span')
@@ -189,38 +172,27 @@ renderInputType.checkbox = (checkboxContainer, params) => {
   return checkboxContainer
 }
 
-/**
- * @param {HTMLTextAreaElement} textarea
- * @param {SweetAlertOptions} params
- * @returns
- */
 renderInputType.textarea = (textarea, params) => {
-  checkAndSetInputValue(textarea, params)
+  textarea.value = params.inputValue
   setInputPlaceholder(textarea, params)
   setInputLabel(textarea, textarea, params)
 
-  const getMargin = (el) =>
-    parseInt(window.getComputedStyle(el).marginLeft) + parseInt(window.getComputedStyle(el).marginRight)
+  const getPadding = (el) => parseInt(window.getComputedStyle(el).paddingLeft) + parseInt(window.getComputedStyle(el).paddingRight)
 
-  // https://github.com/sweetalert2/sweetalert2/issues/2291
-  setTimeout(() => {
-    // https://github.com/sweetalert2/sweetalert2/issues/1699
-    if ('MutationObserver' in window) {
-      const initialPopupWidth = parseInt(window.getComputedStyle(dom.getPopup()).width)
-      const textareaResizeHandler = () => {
-        const textareaWidth = textarea.offsetWidth + getMargin(textarea)
-        if (textareaWidth > initialPopupWidth) {
-          dom.getPopup().style.width = `${textareaWidth}px`
-        } else {
-          dom.getPopup().style.width = null
-        }
+  if ('MutationObserver' in window) { // #1699
+    const initialPopupWidth = parseInt(window.getComputedStyle(dom.getPopup()).width)
+    const outputsize = () => {
+      const contentWidth = textarea.offsetWidth + getPadding(dom.getPopup()) + getPadding(dom.getContent())
+      if (contentWidth > initialPopupWidth) {
+        dom.getPopup().style.width = `${contentWidth}px`
+      } else {
+        dom.getPopup().style.width = null
       }
-      new MutationObserver(textareaResizeHandler).observe(textarea, {
-        attributes: true,
-        attributeFilter: ['style'],
-      })
     }
-  })
+    new MutationObserver(outputsize).observe(textarea, {
+      attributes: true, attributeFilter: ['style']
+    })
+  }
 
   return textarea
 }

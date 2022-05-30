@@ -16,28 +16,33 @@ export const uniqueArray = (arr) => {
 
 /**
  * Capitalize the first letter of a string
- * @param {string} str
- * @returns {string}
+ * @param str
  */
 export const capitalizeFirstLetter = (str) => str.charAt(0).toUpperCase() + str.slice(1)
 
 /**
- * @param {NodeList | HTMLCollection | NamedNodeMap} nodeList
- * @returns {array}
+ * Returns the array of object values (Object.values isn't supported in IE11)
+ * @param obj
+ */
+export const objectValues = (obj) => Object.keys(obj).map(key => obj[key])
+
+/**
+ * Convert NodeList to Array
+ * @param nodeList
  */
 export const toArray = (nodeList) => Array.prototype.slice.call(nodeList)
 
 /**
- * Standardize console warnings
- * @param {string | array} message
+ * Standardise console warnings
+ * @param message
  */
 export const warn = (message) => {
   console.warn(`${consolePrefix} ${typeof message === 'object' ? message.join(' ') : message}`)
 }
 
 /**
- * Standardize console errors
- * @param {string} message
+ * Standardise console errors
+ * @param message
  */
 export const error = (message) => {
   console.error(`${consolePrefix} ${message}`)
@@ -52,7 +57,7 @@ const previousWarnOnceMessages = []
 
 /**
  * Show a console warning, but only if it hasn't already been shown
- * @param {string} message
+ * @param message
  */
 export const warnOnce = (message) => {
   if (!previousWarnOnceMessages.includes(message)) {
@@ -65,9 +70,7 @@ export const warnOnce = (message) => {
  * Show a one-time console warning about deprecated params/methods
  */
 export const warnAboutDeprecation = (deprecatedParam, useInstead) => {
-  warnOnce(
-    `"${deprecatedParam}" is deprecated and will be removed in the next major release. Please use "${useInstead}" instead.`
-  )
+  warnOnce(`"${deprecatedParam}" is deprecated and will be removed in the next major release. Please use "${useInstead}" instead.`)
 }
 
 /**
@@ -75,12 +78,10 @@ export const warnAboutDeprecation = (deprecatedParam, useInstead) => {
  * Otherwise, just pass the value through
  * @param arg
  */
-export const callIfFunction = (arg) => (typeof arg === 'function' ? arg() : arg)
+export const callIfFunction = (arg) => typeof arg === 'function' ? arg() : arg
 
 export const hasToPromiseFn = (arg) => arg && typeof arg.toPromise === 'function'
 
-export const asPromise = (arg) => (hasToPromiseFn(arg) ? arg.toPromise() : Promise.resolve(arg))
+export const asPromise = (arg) => hasToPromiseFn(arg) ? arg.toPromise() : Promise.resolve(arg)
 
 export const isPromise = (arg) => arg && Promise.resolve(arg) === arg
-
-export const getRandomElement = (arr) => arr[Math.floor(Math.random() * arr.length)]

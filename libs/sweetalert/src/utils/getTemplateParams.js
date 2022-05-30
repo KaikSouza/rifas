@@ -1,5 +1,5 @@
 import defaultParams from './params.js'
-import { capitalizeFirstLetter, toArray, warn } from './utils.js'
+import { toArray, capitalizeFirstLetter, warn } from './utils.js'
 
 const swalStringParams = ['swal-title', 'swal-html', 'swal-footer']
 
@@ -8,8 +8,7 @@ export const getTemplateParams = (params) => {
   if (!template) {
     return {}
   }
-  /** @type {DocumentFragment} */
-  const templateContent = template.content
+  const templateContent = template.content || template // IE11
 
   showWarningsForElements(templateContent)
 
@@ -19,33 +18,28 @@ export const getTemplateParams = (params) => {
     getSwalImage(templateContent),
     getSwalIcon(templateContent),
     getSwalInput(templateContent),
-    getSwalStringParams(templateContent, swalStringParams)
+    getSwalStringParams(templateContent, swalStringParams),
   )
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
 const getSwalParams = (templateContent) => {
   const result = {}
   toArray(templateContent.querySelectorAll('swal-param')).forEach((param) => {
     showWarningsForAttributes(param, ['name', 'value'])
     const paramName = param.getAttribute('name')
-    const value = param.getAttribute('value')
+    let value = param.getAttribute('value')
     if (typeof defaultParams[paramName] === 'boolean' && value === 'false') {
-      result[paramName] = false
+      value = false
     }
     if (typeof defaultParams[paramName] === 'object') {
-      result[paramName] = JSON.parse(value)
+      value = JSON.parse(value)
     }
+    result[paramName] = value
   })
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
 const getSwalButtons = (templateContent) => {
   const result = {}
   toArray(templateContent.querySelectorAll('swal-button')).forEach((button) => {
@@ -63,12 +57,8 @@ const getSwalButtons = (templateContent) => {
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
 const getSwalImage = (templateContent) => {
   const result = {}
-  /** @type {HTMLElement} */
   const image = templateContent.querySelector('swal-image')
   if (image) {
     showWarningsForAttributes(image, ['src', 'width', 'height', 'alt'])
@@ -88,12 +78,8 @@ const getSwalImage = (templateContent) => {
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
 const getSwalIcon = (templateContent) => {
   const result = {}
-  /** @type {HTMLElement} */
   const icon = templateContent.querySelector('swal-icon')
   if (icon) {
     showWarningsForAttributes(icon, ['type', 'color'])
@@ -108,12 +94,8 @@ const getSwalIcon = (templateContent) => {
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
 const getSwalInput = (templateContent) => {
   const result = {}
-  /** @type {HTMLElement} */
   const input = templateContent.querySelector('swal-input')
   if (input) {
     showWarningsForAttributes(input, ['type', 'label', 'placeholder', 'value'])
@@ -141,28 +123,20 @@ const getSwalInput = (templateContent) => {
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- * @param {string[]} paramNames
- */
 const getSwalStringParams = (templateContent, paramNames) => {
   const result = {}
   for (const i in paramNames) {
     const paramName = paramNames[i]
-    /** @type {HTMLElement} */
     const tag = templateContent.querySelector(paramName)
     if (tag) {
       showWarningsForAttributes(tag, [])
-      result[paramName.replace(/^swal-/, '')] = tag.innerHTML.trim()
+      result[paramName.replace(/^swal-/, '')] = tag.innerHTML
     }
   }
   return result
 }
 
-/**
- * @param {DocumentFragment} templateContent
- */
-const showWarningsForElements = (templateContent) => {
+const showWarningsForElements = (template) => {
   const allowedElements = swalStringParams.concat([
     'swal-param',
     'swal-button',
@@ -171,7 +145,10 @@ const showWarningsForElements = (templateContent) => {
     'swal-input',
     'swal-input-option',
   ])
-  toArray(templateContent.children).forEach((el) => {
+  toArray(template.querySelectorAll('*')).forEach((el) => {
+    if (el.parentNode !== template) { // can't use template.children because of IE11
+      return
+    }
     const tagName = el.tagName.toLowerCase()
     if (allowedElements.indexOf(tagName) === -1) {
       warn(`Unrecognized element <${tagName}>`)
@@ -179,20 +156,12 @@ const showWarningsForElements = (templateContent) => {
   })
 }
 
-/**
- * @param {HTMLElement} el
- * @param {string[]} allowedAttributes
- */
 const showWarningsForAttributes = (el, allowedAttributes) => {
   toArray(el.attributes).forEach((attribute) => {
     if (allowedAttributes.indexOf(attribute.name) === -1) {
       warn([
         `Unrecognized attribute "${attribute.name}" on <${el.tagName.toLowerCase()}>.`,
-        `${
-          allowedAttributes.length
-            ? `Allowed attributes are: ${allowedAttributes.join(', ')}`
-            : 'To set the value, use HTML within the element.'
-        }`,
+        `${allowedAttributes.length ? `Allowed attributes are: ${allowedAttributes.join(', ')}` : 'To set the value, use HTML within the element.'}`
       ])
     }
   })

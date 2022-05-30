@@ -19,16 +19,18 @@ export const swalClasses = prefix([
   'no-transition',
   'toast',
   'toast-shown',
+  'toast-column',
   'show',
   'hide',
   'close',
   'title',
+  'header',
+  'content',
   'html-container',
   'actions',
   'confirm',
   'deny',
   'cancel',
-  'default-outline',
   'footer',
   'icon',
   'icon-content',
@@ -78,7 +80,12 @@ export const swalClasses = prefix([
   'icon-info',
   'icon-question',
   'icon-error',
-  'no-war',
 ])
 
-export const iconTypes = prefix(['success', 'warning', 'info', 'question', 'error'])
+export const iconTypes = prefix([
+  'success',
+  'warning',
+  'info',
+  'question',
+  'error'
+])

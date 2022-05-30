@@ -2,6 +2,7 @@ import * as dom from './dom/index.js'
 import { swalClasses } from './classes.js'
 import { fixScrollbar } from './scrollbarFix.js'
 import { iOSfix } from './iosFix.js'
+import { IEfix } from './ieFix.js'
 import { setAriaHidden } from './aria.js'
 import globalState from '../globalState.js'
 
@@ -18,6 +19,8 @@ export const openPopup = (params) => {
 
   if (typeof params.willOpen === 'function') {
     params.willOpen(popup)
+  } else if (typeof params.onBeforeOpen === 'function') {
+    params.onBeforeOpen(popup) // @deprecated
   }
 
   const bodyStyles = window.getComputedStyle(document.body)
@@ -38,11 +41,17 @@ export const openPopup = (params) => {
     globalState.previousActiveElement = document.activeElement
   }
 
-  if (typeof params.didOpen === 'function') {
-    setTimeout(() => params.didOpen(popup))
-  }
+  runDidOpen(popup, params)
 
   dom.removeClass(container, swalClasses['no-transition'])
+}
+
+const runDidOpen = (popup, params) => {
+  if (typeof params.didOpen === 'function') {
+    setTimeout(() => params.didOpen(popup))
+  } else if (typeof params.onOpen === 'function') {
+    setTimeout(() => params.onOpen(popup)) // @deprecated
+  }
 }
 
 const swalOpenAnimationFinished = (event) => {
@@ -66,6 +75,7 @@ const setScrollingVisibility = (container, popup) => {
 
 const fixScrollContainer = (container, scrollbarPadding, initialBodyOverflow) => {
   iOSfix()
+  IEfix()
 
   if (scrollbarPadding && initialBodyOverflow !== 'hidden') {
     fixScrollbar()
@@ -79,9 +89,9 @@ const fixScrollContainer = (container, scrollbarPadding, initialBodyOverflow) =>
 
 const addClasses = (container, popup, params) => {
   dom.addClass(container, params.showClass.backdrop)
-  // this workaround with opacity is needed for https://github.com/sweetalert2/sweetalert2/issues/2059
+  // the workaround with setting/unsetting opacity is needed for #2019 and 2059
   popup.style.setProperty('opacity', '0', 'important')
-  dom.show(popup, 'grid')
+  dom.show(popup)
   setTimeout(() => {
     // Animate popup right after showing it
     dom.addClass(popup, params.showClass.popup)

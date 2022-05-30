@@ -6,22 +6,15 @@ export const renderPopup = (instance, params) => {
   const popup = dom.getPopup()
 
   // Width
-  // https://github.com/sweetalert2/sweetalert2/issues/2170
-  if (params.toast) {
+  if (params.toast) { // #2170
     dom.applyNumericalStyle(container, 'width', params.width)
     popup.style.width = '100%'
-    popup.insertBefore(dom.getLoader(), dom.getIcon())
   } else {
     dom.applyNumericalStyle(popup, 'width', params.width)
   }
 
   // Padding
   dom.applyNumericalStyle(popup, 'padding', params.padding)
-
-  // Color
-  if (params.color) {
-    popup.style.color = params.color
-  }
 
   // Background
   if (params.background) {

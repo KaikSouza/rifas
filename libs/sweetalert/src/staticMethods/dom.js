@@ -5,6 +5,7 @@ export {
   getContainer,
   getPopup,
   getTitle,
+  getContent,
   getHtmlContainer,
   getImage,
   getIcon,
@@ -15,11 +16,12 @@ export {
   getDenyButton,
   getCancelButton,
   getLoader,
+  getHeader,
   getFooter,
   getTimerProgressBar,
   getFocusableElements,
   getValidationMessage,
-  isLoading,
+  isLoading
 } from '../utils/dom/index.js'
 
 /*

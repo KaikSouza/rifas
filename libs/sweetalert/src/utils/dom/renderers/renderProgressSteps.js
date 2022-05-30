@@ -1,6 +1,7 @@
 import { swalClasses } from '../../classes.js'
 import { warn } from '../../utils.js'
 import * as dom from '../../dom/index.js'
+import { getQueueStep } from '../../../staticMethods/queue.js'
 
 const createStepElement = (step) => {
   const stepEl = document.createElement('li')
@@ -26,17 +27,18 @@ export const renderProgressSteps = (instance, params) => {
 
   dom.show(progressStepsContainer)
   progressStepsContainer.textContent = ''
-  if (params.currentProgressStep >= params.progressSteps.length) {
+  const currentProgressStep = parseInt(params.currentProgressStep === undefined ? getQueueStep() : params.currentProgressStep)
+  if (currentProgressStep >= params.progressSteps.length) {
     warn(
       'Invalid currentProgressStep parameter, it should be less than progressSteps.length ' +
-        '(currentProgressStep like JS arrays starts from 0)'
+      '(currentProgressStep like JS arrays starts from 0)'
     )
   }
 
   params.progressSteps.forEach((step, index) => {
     const stepEl = createStepElement(step)
     progressStepsContainer.appendChild(stepEl)
-    if (index === params.currentProgressStep) {
+    if (index === currentProgressStep) {
       dom.addClass(stepEl, swalClasses['active-progress-step'])
     }
 

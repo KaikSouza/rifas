@@ -2,7 +2,7 @@ import { swalClasses } from '../../classes.js'
 import { warn } from '../../utils.js'
 import * as dom from '../../dom/index.js'
 
-function handleBackdropParam(container, backdrop) {
+function handleBackdropParam (container, backdrop) {
   if (typeof backdrop === 'string') {
     container.style.background = backdrop
   } else if (!backdrop) {
@@ -10,7 +10,7 @@ function handleBackdropParam(container, backdrop) {
   }
 }
 
-function handlePositionParam(container, position) {
+function handlePositionParam (container, position) {
   if (position in swalClasses) {
     dom.addClass(container, swalClasses[position])
   } else {
@@ -19,7 +19,7 @@ function handlePositionParam(container, position) {
   }
 }
 
-function handleGrowParam(container, grow) {
+function handleGrowParam (container, grow) {
   if (grow && typeof grow === 'string') {
     const growClass = `grow-${grow}`
     if (growClass in swalClasses) {
@@ -37,9 +37,20 @@ export const renderContainer = (instance, params) => {
 
   handleBackdropParam(container, params.backdrop)
 
+  if (!params.backdrop && params.allowOutsideClick) {
+    warn('"allowOutsideClick" parameter requires `backdrop` parameter to be set to `true`')
+  }
+
   handlePositionParam(container, params.position)
   handleGrowParam(container, params.grow)
 
   // Custom class
   dom.applyCustomClass(container, params, 'container')
+
+  // Set queue step attribute for getQueueStep() method
+  const queueStep = document.body.getAttribute('data-swal2-queue-step')
+  if (queueStep) {
+    container.setAttribute('data-queue-step', queueStep)
+    document.body.removeAttribute('data-swal2-queue-step')
+  }
 }

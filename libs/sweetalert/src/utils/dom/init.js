@@ -1,32 +1,36 @@
 import { swalClasses } from '../classes.js'
-import { getContainer, getPopup } from './getters.js'
-import { addClass, getDirectChildByClass, removeClass, setInnerHtml } from './domUtils.js'
+import { getContainer, getPopup, getContent } from './getters.js'
+import { addClass, removeClass, getChildByClass, setInnerHtml } from './domUtils.js'
 import { isNodeEnv } from '../isNodeEnv.js'
-import { error, getRandomElement } from '../utils.js'
-import globalState from '../../globalState.js'
+import { error } from '../utils.js'
+import sweetAlert from '../../sweetalert2.js'
 
 const sweetHTML = `
- <div aria-labelledby="${swalClasses.title}" aria-describedby="${swalClasses['html-container']}" class="${swalClasses.popup}" tabindex="-1">
-   <button type="button" class="${swalClasses.close}"></button>
-   <ul class="${swalClasses['progress-steps']}"></ul>
-   <div class="${swalClasses.icon}"></div>
-   <img class="${swalClasses.image}" />
-   <h2 class="${swalClasses.title}" id="${swalClasses.title}"></h2>
-   <div class="${swalClasses['html-container']}" id="${swalClasses['html-container']}"></div>
-   <input class="${swalClasses.input}" />
-   <input type="file" class="${swalClasses.file}" />
-   <div class="${swalClasses.range}">
-     <input type="range" />
-     <output></output>
+ <div aria-labelledby="${swalClasses.title}" aria-describedby="${swalClasses.content}" class="${swalClasses.popup}" tabindex="-1">
+   <div class="${swalClasses.header}">
+     <ul class="${swalClasses['progress-steps']}"></ul>
+     <div class="${swalClasses.icon}"></div>
+     <img class="${swalClasses.image}" />
+     <h2 class="${swalClasses.title}" id="${swalClasses.title}"></h2>
+     <button type="button" class="${swalClasses.close}"></button>
    </div>
-   <select class="${swalClasses.select}"></select>
-   <div class="${swalClasses.radio}"></div>
-   <label for="${swalClasses.checkbox}" class="${swalClasses.checkbox}">
-     <input type="checkbox" />
-     <span class="${swalClasses.label}"></span>
-   </label>
-   <textarea class="${swalClasses.textarea}"></textarea>
-   <div class="${swalClasses['validation-message']}" id="${swalClasses['validation-message']}"></div>
+   <div class="${swalClasses.content}">
+     <div id="${swalClasses.content}" class="${swalClasses['html-container']}"></div>
+     <input class="${swalClasses.input}" />
+     <input type="file" class="${swalClasses.file}" />
+     <div class="${swalClasses.range}">
+       <input type="range" />
+       <output></output>
+     </div>
+     <select class="${swalClasses.select}"></select>
+     <div class="${swalClasses.radio}"></div>
+     <label for="${swalClasses.checkbox}" class="${swalClasses.checkbox}">
+       <input type="checkbox" />
+       <span class="${swalClasses.label}"></span>
+     </label>
+     <textarea class="${swalClasses.textarea}"></textarea>
+     <div class="${swalClasses['validation-message']}" id="${swalClasses['validation-message']}"></div>
+   </div>
    <div class="${swalClasses.actions}">
      <div class="${swalClasses.loader}"></div>
      <button type="button" class="${swalClasses.confirm}"></button>
@@ -46,29 +50,37 @@ const resetOldContainer = () => {
     return false
   }
 
-  oldContainer.remove()
+  oldContainer.parentNode.removeChild(oldContainer)
   removeClass(
     [document.documentElement, document.body],
-    [swalClasses['no-backdrop'], swalClasses['toast-shown'], swalClasses['has-column']]
+    [
+      swalClasses['no-backdrop'],
+      swalClasses['toast-shown'],
+      swalClasses['has-column']
+    ]
   )
 
   return true
 }
 
-const resetValidationMessage = () => {
-  globalState.currentInstance.resetValidationMessage()
+let oldInputVal // IE11 workaround, see #1109 for details
+const resetValidationMessage = (e) => {
+  if (sweetAlert.isVisible() && oldInputVal !== e.target.value) {
+    sweetAlert.resetValidationMessage()
+  }
+  oldInputVal = e.target.value
 }
 
 const addInputChangeListeners = () => {
-  const popup = getPopup()
+  const content = getContent()
 
-  const input = getDirectChildByClass(popup, swalClasses.input)
-  const file = getDirectChildByClass(popup, swalClasses.file)
-  const range = popup.querySelector(`.${swalClasses.range} input`)
-  const rangeOutput = popup.querySelector(`.${swalClasses.range} output`)
-  const select = getDirectChildByClass(popup, swalClasses.select)
-  const checkbox = popup.querySelector(`.${swalClasses.checkbox} input`)
-  const textarea = getDirectChildByClass(popup, swalClasses.textarea)
+  const input = getChildByClass(content, swalClasses.input)
+  const file = getChildByClass(content, swalClasses.file)
+  const range = content.querySelector(`.${swalClasses.range} input`)
+  const rangeOutput = content.querySelector(`.${swalClasses.range} output`)
+  const select = getChildByClass(content, swalClasses.select)
+  const checkbox = content.querySelector(`.${swalClasses.checkbox} input`)
+  const textarea = getChildByClass(content, swalClasses.textarea)
 
   input.oninput = resetValidationMessage
   file.onchange = resetValidationMessage
@@ -76,18 +88,18 @@ const addInputChangeListeners = () => {
   checkbox.onchange = resetValidationMessage
   textarea.oninput = resetValidationMessage
 
-  range.oninput = () => {
-    resetValidationMessage()
+  range.oninput = (e) => {
+    resetValidationMessage(e)
     rangeOutput.value = range.value
   }
 
-  range.onchange = () => {
-    resetValidationMessage()
+  range.onchange = (e) => {
+    resetValidationMessage(e)
     range.nextSibling.value = range.value
   }
 }
 
-const getTarget = (target) => (typeof target === 'string' ? document.querySelector(target) : target)
+const getTarget = (target) => typeof target === 'string' ? document.querySelector(target) : target
 
 const setupAccessibility = (params) => {
   const popup = getPopup()
@@ -106,7 +118,7 @@ const setupRTL = (targetElement) => {
 }
 
 /*
- * Add modal + backdrop + no-war message for Russians to DOM
+ * Add modal + backdrop to DOM
  */
 export const init = (params) => {
   // Clean up the old popup container if it exists
@@ -131,53 +143,4 @@ export const init = (params) => {
   setupAccessibility(params)
   setupRTL(targetElement)
   addInputChangeListeners()
-
-  noWarMessageForRussians(container, params)
-}
-
-const noWarMessageForRussians = (container, params) => {
-  if (params.toast) {
-    return
-  }
-  // This message is targeted at people who are corrupted by propaganda, everybody else
-  // is already against war either silently or actively.
-  //
-  // The point is to wrap the truth-bomb into a patriotic title so they will actually click it
-  // and listen to the uncomfortable truth about the war from the people they love or respect.
-  const message = getRandomElement([
-    {
-      text: 'ШВАРЦЕНЕГГЕР обратился <br> к РУССКОМУ НАРОДУ о войне',
-      // Arnold is loved in Russia by all people including those who are for this war
-      // His speech might change the mind of those who are brainwashed by propaganda
-      youtubeId: 'fWClXZd9c78',
-    },
-    {
-      text: 'РУССКИЙ ПАТРИОТ <br> открыл главную тайну спецоперации',
-      // In this video one of the most famous Russian nationalist leaders, Dmitry Demushkin,
-      // explains that this war has no sense and produces the exact opposite result of what
-      // it was intended to do.
-      youtubeId: '_RjBNkn88yA',
-    },
-    {
-      text: 'ГЕРОЙ НОВОРОССИИ СТРЕЛКОВ <br> дал оценку ходу спецоперации',
-      // In this video Igor Girkin, who played a key role in the annexation of Crimea,
-      // explains that this war has failed already and all possible outcomes are bad for Russia.
-      youtubeId: 'yUmzQT4C8JY',
-    },
-    {
-      text: 'ФИНСКИЙ ДРУГ РОССИИ <br> говорит ПО-РУССКИ о спецоперации',
-      youtubeId: 'hkCYb6edUrQ',
-    },
-  ])
-  // The message will only be shown to Russian users visiting Russian sites
-  if (navigator.language === 'ru' && location.host.match(/\.(ru|su|xn--p1ai)$/)) {
-    const noWar = document.createElement('div')
-    noWar.className = swalClasses['no-war']
-    setInnerHtml(
-      noWar,
-      `<a href="https://www.youtube.com/watch?v=${message.youtubeId}" target="_blank">${message.text}</a>`
-    )
-    container.appendChild(noWar)
-    container.style.paddingTop = '4em'
-  }
 }

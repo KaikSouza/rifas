@@ -5,29 +5,17 @@ import { capitalizeFirstLetter } from '../../utils.js'
 export const renderActions = (instance, params) => {
   const actions = dom.getActions()
   const loader = dom.getLoader()
+  const confirmButton = dom.getConfirmButton()
+  const denyButton = dom.getDenyButton()
+  const cancelButton = dom.getCancelButton()
 
   // Actions (buttons) wrapper
   if (!params.showConfirmButton && !params.showDenyButton && !params.showCancelButton) {
     dom.hide(actions)
-  } else {
-    dom.show(actions)
   }
 
   // Custom class
   dom.applyCustomClass(actions, params, 'actions')
-
-  // Render all the buttons
-  renderButtons(actions, loader, params)
-
-  // Loader
-  dom.setInnerHtml(loader, params.loaderHtml)
-  dom.applyCustomClass(loader, params, 'loader')
-}
-
-function renderButtons(actions, loader, params) {
-  const confirmButton = dom.getConfirmButton()
-  const denyButton = dom.getDenyButton()
-  const cancelButton = dom.getCancelButton()
 
   // Render buttons
   renderButton(confirmButton, 'confirm', params)
@@ -36,18 +24,17 @@ function renderButtons(actions, loader, params) {
   handleButtonsStyling(confirmButton, denyButton, cancelButton, params)
 
   if (params.reverseButtons) {
-    if (params.toast) {
-      actions.insertBefore(cancelButton, confirmButton)
-      actions.insertBefore(denyButton, confirmButton)
-    } else {
-      actions.insertBefore(cancelButton, loader)
-      actions.insertBefore(denyButton, loader)
-      actions.insertBefore(confirmButton, loader)
-    }
+    actions.insertBefore(cancelButton, loader)
+    actions.insertBefore(denyButton, loader)
+    actions.insertBefore(confirmButton, loader)
   }
+
+  // Loader
+  dom.setInnerHtml(loader, params.loaderHtml)
+  dom.applyCustomClass(loader, params, 'loader')
 }
 
-function handleButtonsStyling(confirmButton, denyButton, cancelButton, params) {
+function handleButtonsStyling (confirmButton, denyButton, cancelButton, params) {
   if (!params.buttonsStyling) {
     return dom.removeClass([confirmButton, denyButton, cancelButton], swalClasses.styled)
   }
@@ -57,19 +44,16 @@ function handleButtonsStyling(confirmButton, denyButton, cancelButton, params) {
   // Buttons background colors
   if (params.confirmButtonColor) {
     confirmButton.style.backgroundColor = params.confirmButtonColor
-    dom.addClass(confirmButton, swalClasses['default-outline'])
   }
   if (params.denyButtonColor) {
     denyButton.style.backgroundColor = params.denyButtonColor
-    dom.addClass(denyButton, swalClasses['default-outline'])
   }
   if (params.cancelButtonColor) {
     cancelButton.style.backgroundColor = params.cancelButtonColor
-    dom.addClass(cancelButton, swalClasses['default-outline'])
   }
 }
 
-function renderButton(button, buttonType, params) {
+function renderButton (button, buttonType, params) {
   dom.toggle(button, params[`show${capitalizeFirstLetter(buttonType)}Button`], 'inline-block')
   dom.setInnerHtml(button, params[`${buttonType}ButtonText`]) // Set caption text
   button.setAttribute('aria-label', params[`${buttonType}ButtonAriaLabel`]) // ARIA label

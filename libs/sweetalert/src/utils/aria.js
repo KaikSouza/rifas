@@ -1,4 +1,5 @@
 import { getContainer } from './dom/getters.js'
+import { contains } from './dom/domUtils.js'
 import { toArray } from './utils.js'
 
 // From https://developer.paciellogroup.com/blog/2018/06/the-current-state-of-modal-dialog-accessibility/
@@ -8,8 +9,8 @@ import { toArray } from './utils.js'
 
 export const setAriaHidden = () => {
   const bodyChildren = toArray(document.body.children)
-  bodyChildren.forEach((el) => {
-    if (el === getContainer() || el.contains(getContainer())) {
+  bodyChildren.forEach(el => {
+    if (el === getContainer() || contains(el, getContainer())) {
       return
     }
 
@@ -22,7 +23,7 @@ export const setAriaHidden = () => {
 
 export const unsetAriaHidden = () => {
   const bodyChildren = toArray(document.body.children)
-  bodyChildren.forEach((el) => {
+  bodyChildren.forEach(el => {
     if (el.hasAttribute('data-previous-aria-hidden')) {
       el.setAttribute('aria-hidden', el.getAttribute('data-previous-aria-hidden'))
       el.removeAttribute('data-previous-aria-hidden')

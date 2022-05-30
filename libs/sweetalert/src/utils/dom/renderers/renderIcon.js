@@ -1,4 +1,4 @@
-import { iconTypes, swalClasses } from '../../classes.js'
+import { swalClasses, iconTypes } from '../../classes.js'
 import { error } from '../../utils.js'
 import * as dom from '../../dom/index.js'
 import privateProps from '../../../privateProps.js'
@@ -48,14 +48,14 @@ const applyStyles = (icon, params) => {
   setColor(icon, params)
 
   // Success icon background color
-  adjustSuccessIconBackgroundColor()
+  adjustSuccessIconBackgoundColor()
 
   // Custom class
   dom.applyCustomClass(icon, params, 'icon')
 }
 
 // Adjust success icon background color to match the popup background color
-const adjustSuccessIconBackgroundColor = () => {
+const adjustSuccessIconBackgoundColor = () => {
   const popup = dom.getPopup()
   const popupBackgroundColor = window.getComputedStyle(popup).getPropertyValue('background-color')
   const successIconParts = popup.querySelectorAll('[class^=swal2-success-circular-line], .swal2-success-fix')
@@ -64,34 +64,30 @@ const adjustSuccessIconBackgroundColor = () => {
   }
 }
 
-const successIconHtml = `
-  <div class="swal2-success-circular-line-left"></div>
-  <span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span>
-  <div class="swal2-success-ring"></div> <div class="swal2-success-fix"></div>
-  <div class="swal2-success-circular-line-right"></div>
-`
-
-const errorIconHtml = `
-  <span class="swal2-x-mark">
-    <span class="swal2-x-mark-line-left"></span>
-    <span class="swal2-x-mark-line-right"></span>
-  </span>
-`
-
 const setContent = (icon, params) => {
   icon.textContent = ''
 
   if (params.iconHtml) {
     dom.setInnerHtml(icon, iconContent(params.iconHtml))
   } else if (params.icon === 'success') {
-    dom.setInnerHtml(icon, successIconHtml)
+    dom.setInnerHtml(icon, `
+      <div class="swal2-success-circular-line-left"></div>
+      <span class="swal2-success-line-tip"></span> <span class="swal2-success-line-long"></span>
+      <div class="swal2-success-ring"></div> <div class="swal2-success-fix"></div>
+      <div class="swal2-success-circular-line-right"></div>
+    `)
   } else if (params.icon === 'error') {
-    dom.setInnerHtml(icon, errorIconHtml)
+    dom.setInnerHtml(icon, `
+      <span class="swal2-x-mark">
+        <span class="swal2-x-mark-line-left"></span>
+        <span class="swal2-x-mark-line-right"></span>
+      </span>
+    `)
   } else {
     const defaultIconHtml = {
       question: '?',
       warning: '!',
-      info: 'i',
+      info: 'i'
     }
     dom.setInnerHtml(icon, iconContent(defaultIconHtml[params.icon]))
   }
@@ -103,12 +99,7 @@ const setColor = (icon, params) => {
   }
   icon.style.color = params.iconColor
   icon.style.borderColor = params.iconColor
-  for (const sel of [
-    '.swal2-success-line-tip',
-    '.swal2-success-line-long',
-    '.swal2-x-mark-line-left',
-    '.swal2-x-mark-line-right',
-  ]) {
+  for (const sel of ['.swal2-success-line-tip', '.swal2-success-line-long', '.swal2-x-mark-line-left', '.swal2-x-mark-line-right']) {
     dom.setStyle(icon, sel, 'backgroundColor', params.iconColor)
   }
   dom.setStyle(icon, '.swal2-success-ring', 'borderColor', params.iconColor)

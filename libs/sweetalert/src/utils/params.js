@@ -11,6 +11,7 @@ export const defaultParams = {
   iconHtml: undefined,
   template: undefined,
   toast: false,
+  animation: true,
   showClass: {
     popup: 'swal2-show',
     backdrop: 'swal2-backdrop-show',
@@ -23,7 +24,6 @@ export const defaultParams = {
   },
   customClass: {},
   target: 'body',
-  color: undefined,
   backdrop: true,
   heightAuto: true,
   allowOutsideClick: true,
@@ -50,7 +50,6 @@ export const defaultParams = {
   focusConfirm: true,
   focusDeny: false,
   focusCancel: false,
-  returnFocus: true,
   showCloseButton: false,
   closeButtonHtml: '&times;',
   closeButtonAriaLabel: 'Close this dialog',
@@ -81,13 +80,19 @@ export const defaultParams = {
   progressSteps: [],
   currentProgressStep: undefined,
   progressStepsDistance: undefined,
+  onBeforeOpen: undefined,
+  onOpen: undefined,
   willOpen: undefined,
   didOpen: undefined,
+  onRender: undefined,
   didRender: undefined,
+  onClose: undefined,
+  onAfterClose: undefined,
   willClose: undefined,
   didClose: undefined,
+  onDestroy: undefined,
   didDestroy: undefined,
-  scrollbarPadding: true,
+  scrollbarPadding: true
 }
 
 export const updatableParams = [
@@ -100,7 +105,6 @@ export const updatableParams = [
   'cancelButtonText',
   'closeButtonAriaLabel',
   'closeButtonHtml',
-  'color',
   'confirmButtonAriaLabel',
   'confirmButtonColor',
   'confirmButtonText',
@@ -121,10 +125,10 @@ export const updatableParams = [
   'imageHeight',
   'imageUrl',
   'imageWidth',
-  'preConfirm',
-  'preDeny',
+  'onAfterClose',
+  'onClose',
+  'onDestroy',
   'progressSteps',
-  'returnFocus',
   'reverseButtons',
   'showCancelButton',
   'showCloseButton',
@@ -136,7 +140,15 @@ export const updatableParams = [
   'willClose',
 ]
 
-export const deprecatedParams = {}
+export const deprecatedParams = {
+  animation: 'showClass" and "hideClass',
+  onBeforeOpen: 'willOpen',
+  onOpen: 'didOpen',
+  onRender: 'didRender',
+  onClose: 'willClose',
+  onAfterClose: 'didClose',
+  onDestroy: 'didDestroy',
+}
 
 const toastIncompatibleParams = [
   'allowOutsideClick',
@@ -145,14 +157,13 @@ const toastIncompatibleParams = [
   'focusConfirm',
   'focusDeny',
   'focusCancel',
-  'returnFocus',
   'heightAuto',
-  'keydownListenerCapture',
+  'keydownListenerCapture'
 ]
 
 /**
  * Is valid parameter
- * @param {string} paramName
+ * @param {String} paramName
  */
 export const isValidParameter = (paramName) => {
   return Object.prototype.hasOwnProperty.call(defaultParams, paramName)
@@ -160,7 +171,7 @@ export const isValidParameter = (paramName) => {
 
 /**
  * Is valid parameter for Swal.update() method
- * @param {string} paramName
+ * @param {String} paramName
  */
 export const isUpdatableParameter = (paramName) => {
   return updatableParams.indexOf(paramName) !== -1
@@ -168,7 +179,7 @@ export const isUpdatableParameter = (paramName) => {
 
 /**
  * Is deprecated parameter
- * @param {string} paramName
+ * @param {String} paramName
  */
 export const isDeprecatedParameter = (paramName) => {
   return deprecatedParams[paramName]
@@ -198,10 +209,6 @@ const checkIfParamIsDeprecated = (param) => {
  * @param params
  */
 export const showWarningsForParams = (params) => {
-  if (!params.backdrop && params.allowOutsideClick) {
-    warn('"allowOutsideClick" parameter requires `backdrop` parameter to be set to `true`')
-  }
-
   for (const param in params) {
     checkIfParamIsValid(param)
 
