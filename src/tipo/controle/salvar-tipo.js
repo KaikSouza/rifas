@@ -1,6 +1,6 @@
-$(document).ready(function(){
+$(document).ready(function() {
 
-    $('.btn-salvar').click(function(e){
+    $('.btn-salvar').click(function(e) {
         e.preventDefault()
 
         let dados = $('#form-tipo').serialize()
@@ -13,7 +13,7 @@ $(document).ready(function(){
             assync: true,
             data: dados,
             url: 'src/tipo/modelo/salvar-tipo.php',
-            success: function(dados){
+            success: function(dados) {
                 Swal.fire({
                     title: 'SysRifa',
                     text: dados.mensagem,
