@@ -8,7 +8,7 @@ $(document).ready(function() {
         $('.modal-body').empty()
 
         //Incluir novos textos no cabeçalho da minha janela modal
-        $('.modal-title').append('Adicionar novo registro')
+        $('.modal-title').append('Adicionar novo comprador')
 
         //Incluir nosso formulário dentro do corpo da nossa janela modal
         $('.modal-body').load('src/comprador/visao/form-comprador.html')
