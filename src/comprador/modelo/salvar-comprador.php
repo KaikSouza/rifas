@@ -22,10 +22,10 @@ if(empty($requestData['NOME'] && $requestData['CELULAR'])){
     if($operacao == 'insert'){
         //Comandos para INSERT no banco de dados ocorrerem
         try{
-            $stmt = $pdo->('INSERT INTO COMPRADOR (NOME, CELULAR) VALUES (:a)');
+            $stmt = $pdo->prepare('INSERT INTO COMPRADOR (NOME, CELULAR) VALUES (:a, :b)');
             $stmt->execute(array(
                 ':a' => utf8_decode($requestData['NOME']),
-                ':a' => utf8_decode($requestData['CELULAR'])
+                ':b' => utf8_decode($requestData['CELULAR'])
             ));
             $dados = array(
                 "tipo" => 'success',
@@ -40,11 +40,11 @@ if(empty($requestData['NOME'] && $requestData['CELULAR'])){
     } else{
         //Se a nossa operação vir vazia, então iremos realizar um UPDATE
         try{
-            $stmt = $pdo->('UPDATE COMPRADOR SET NOME = :a, CELULAR = :a WHERE ID = :id');
+            $stmt = $pdo->prepare('UPDATE COMPRADOR SET NOME = :a, CELULAR = :b WHERE ID = :id');
             $stmt->execute(array(
                 ':id' => $ID,
                 ':a' => utf8_decode($requestData['NOME']),
-                ':a' => utf8_decode($requestData['CELULAR']),
+                ':b' => utf8_decode($requestData['CELULAR']),
             ));
             $dados = array(
                 "tipo" => 'success',
