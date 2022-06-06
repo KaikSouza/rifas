@@ -11,7 +11,7 @@ if(empty($requestData['NOME'])){
     //Caso a varável venha vazia do formulário, retornar um erro
     $dados = array(
         "tipo" => 'error',
-        "Mensagem" => 'Existe(m) campo(s) obrigatório(s) não preenchido(s)!'
+        "mensagem" => 'Existe(m) campo(s) obrigatório(s) não preenchido(s)!'
     );
 } else {
     //Caso os campos obrigatórios venham preenchidos, iremos realizar o cadastro
@@ -28,12 +28,12 @@ if(empty($requestData['NOME'])){
             ));
             $dados = array(
                 "tipo" => 'success',
-                "Mensagem" => 'Registro salvo com sucesso!'
+                "mensagem" => 'Registro salvo com sucesso!'
             );
          } catch(PDOException $e){
             $dados = array(
                 "tipo" => 'error',
-                "Mensagem" => 'Não foi possível salvar o registro: '.$e
+                "mensagem" => 'Não foi possível salvar o registro: '.$e
             );
          }
     } else{
@@ -46,12 +46,12 @@ if(empty($requestData['NOME'])){
             ));
             $dados = array(
                 "tipo" => 'success',
-                "Mensagem" => 'Atualizado com sucesso!'
+                "mensagem" => 'Atualizado com sucesso!'
             );
          } catch(PDOException $e){
             $dados = array(
                 "tipo" => 'error',
-                "Mensagem" => 'Não foi possível atualizar o registro: '.$e
+                "mensagem" => 'Não foi possível atualizar o registro: '.$e
             );
          }
     }
