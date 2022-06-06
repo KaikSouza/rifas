@@ -20,7 +20,7 @@ if(empty($requestData['NOME'] && $requestData['CELULAR'])){
 
     //Verificação para cadastro ou atualização de registro
     if($operacao == 'insert'){
-        //Comandos para INSERT no banco de dados ocorrerem
+        Comandos para INSERT no banco de dados ocorrerem
         try{
             $stmt = $pdo->prepare('INSERT INTO COMPRADOR (NOME, CELULAR) VALUES (:a, :b)');
             $stmt->execute(array(
