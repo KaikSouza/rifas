@@ -16,7 +16,7 @@ if(empty($requestData['NOME'])){
 } else {
     //Caso os campos obrigatórios venham preenchidos, iremos realizar o cadastro
     $ID = isset($requestData['ID']) ? $requestData['ID'] : '';
-    $operacao = isset($requestdata['operacao']) ? $requestData['operacao'] : '';
+    $operacao = isset($requestData['operacao']) ? $requestData['operacao'] : '';
 
     //Verificação para cadastro ou atualização de registro
     if($operacao == 'insert'){
