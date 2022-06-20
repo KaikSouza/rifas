@@ -7,7 +7,7 @@ include('../../conexao/conexao.php');
 $ID = $_REQUEST['ID'];
 
 //gerar nossa consulta sql no banco de dados
-$sql = 'SELECT * FROM TIPO WHERE ID = $ID';
+$sql = "SELECT * FROM TIPO WHERE ID = $ID";
 
 //executar a nossa query de consulta ao banco de dados
 $resultado = $pdo->query($sql);
@@ -32,5 +32,3 @@ if($resultado){
 }
 
 echo json_encode($dados);
-
-?>

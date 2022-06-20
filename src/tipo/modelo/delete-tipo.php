@@ -22,4 +22,3 @@ if($resultado){
 }
 
 echo json_encode($dados);
-?>
