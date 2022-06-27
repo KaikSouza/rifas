@@ -25,7 +25,7 @@ $(document).ready(function(){
                         $('#NOME').attr('readonly', 'true')
                     })
                     $('.btn-salvar').hide()
-                    $('#modal-tipo').show()
+                    $('#modal-tipo').modal('show')
                 }else{
                     Swal.fire({
                         title: 'Gerenciamento de Rifas',
